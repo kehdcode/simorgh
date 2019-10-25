@@ -5,6 +5,7 @@ import path from 'path';
 // not part of react-helmet
 import helmet from 'helmet';
 import gnuTP from 'gnu-terry-pratchett';
+import timemachine from 'timemachine';
 import routes from '#app/routes';
 import {
   articleDataRegexPath,
@@ -95,6 +96,12 @@ const sendDataFile = (res, dataFilePath, next) => {
 };
 
 if (process.env.APP_ENV === 'local') {
+  // I fixed system time for the POC so I could test time logic without having to
+  // keep updating the fixtures when the current time fell outside of the fixture timestamps.
+  // Not sure this is a great idea beyond this POC, but need to decide how to be able to
+  // compare 'current' time vs fixture data with timestamps.
+  timemachine.config({ timestamp: 1571936500000 });
+
   server
     .use((req, res, next) => {
       if (req.url.substr(-1) === '/' && req.url.length > 1)
@@ -193,7 +200,7 @@ server
   .get('/*', async ({ url, headers, path: urlPath }, res) => {
     try {
       const { service, isAmp, route, variant } = getRouteProps(routes, url);
-      const data = await route.getInitialData(urlPath);
+      const data = await route.getInitialData(urlPath, service);
       const { status } = data;
       const bbcOrigin = headers['bbc-origin'];
 

@@ -5,6 +5,7 @@ import path from 'ramda/src/path';
 import { frontPageDataPropTypes } from '#models/propTypes/frontPage';
 import { Grid, GridItemConstrainedLargeWithTopMargin } from '#lib/styledGrid';
 import { ServiceContext } from '#contexts/ServiceContext';
+import RadioSchedules from '../RadioSchedules';
 import FrontPageSection from '../FrontPageSection';
 import MetadataContainer from '../Metadata';
 import LinkedData from '../LinkedData';
@@ -23,6 +24,7 @@ const FrontPageMain = ({ frontPageData }) => {
   const lang = path(['metadata', 'language'], frontPageData);
   const description = path(['metadata', 'summary'], frontPageData);
   const seoTitle = path(['promo', 'name'], frontPageData);
+  const schedules = path(['schedules'], frontPageData);
 
   // eslint-disable-next-line jsx-a11y/aria-role
   const offScreenText = (
@@ -50,6 +52,10 @@ const FrontPageMain = ({ frontPageData }) => {
         </VisuallyHiddenText>
         <Grid>
           <GridItemConstrainedLargeWithTopMargin>
+            {/* Position needs to be configurable - have just put at top of page for POC */}
+            {!!schedules && schedules.length > 0 && (
+              <RadioSchedules schedules={schedules} />
+            )}
             {groups.map((group, index) => (
               <FrontPageSection
                 key={group.title}
