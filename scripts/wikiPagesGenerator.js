@@ -18,25 +18,24 @@ const environments = {
   live: 'https://www.bbc.com',
 };
 
-const results = configs => {
-  let output = {};
-  configs.forEach;
-};
-
 const getData = results => {
   let output = {};
 
-  results.forEach(({ env, pageType, url, service }) => {
-    output = {
-      ...output,
-      [service]: {
-        ...(output[service] || {}),
-        [pageType]: {
-          ...((output[service] && output[service][pageType]) || {}),
-          [env]: url,
-        },
-      },
-    };
+  Object.keys(results).forEach(config => {
+    Object.keys(results[config]).forEach(service => {
+      Object.keys(results[config][service].pageTypes).forEach(pageType => {
+        output = {
+          ...output,
+          [service]: {
+            ...(output[service] || {}),
+            [pageType]: {
+              ...((output[service] && output[service][pageType]) || {}),
+              [config]: results[config][service].pageTypes[pageType].path,
+            },
+          },
+        };
+      });
+    });
   });
 
   return output;
@@ -51,9 +50,13 @@ const table = services => {
 
     Object.keys(services[service]).forEach(pageType => {
       Object.keys(services[service][pageType]).forEach(enviroment => {
-        if (enviroment === env) {
+        if (
+          enviroment === env &&
+          services[service][pageType][enviroment] &&
+          pageType !== 'errorPage404'
+        ) {
           output.push(
-            `[${pageType}](${services[service][pageType][enviroment]})`,
+            `[${pageType}](${environments[enviroment]}${services[service][pageType][enviroment]})`,
           );
         }
       });
@@ -78,12 +81,4 @@ const table = services => {
   });
 };
 
-Object.keys(configs).forEach(config => {
-  console.log(config);
-  Object.keys(configs[config]).forEach(service => {
-    console.log(service);
-    Object.keys(configs[config][service].pageTypes).forEach(pageType => {
-      console.log(configs[config][service].pageTypes[pageType].path);
-    });
-  });
-});
+table(getData(configs));
