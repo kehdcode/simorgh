@@ -470,7 +470,7 @@ export const testsThatNeverRunDuringSmokeTestingForAllPageTypes = ({
   pageType,
 }) => {
   describe(`Running testsToNeverSmokeTestForAllPageTypes for ${service} ${pageType}`, () => {
-    if (Cypress.env('APP_ENV') === 'live') {
+    if (Cypress.env('APP_ENV') === 'dave') {
       describe('Page links test', () => {
         it('Top navigation links should not 404', () => {
           cy.get('header a').each(element => {
