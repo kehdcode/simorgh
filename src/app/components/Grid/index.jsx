@@ -1,4 +1,6 @@
+import React from 'react';
 import styled, { css } from 'styled-components';
+import { node } from 'prop-types';
 import Grid from '@bbc/psammead-grid';
 import {
   GEL_GROUP_2_SCREEN_WIDTH_MIN,
@@ -57,5 +59,56 @@ export const FrontPageGrid = styled(GridMaxWidthGroup5)`
     margin-top: 0;
   }
 `;
+
+export const TwoColumnLayout = ({ firstColItems, secondColItems }) => {
+  const gridOffset = {
+    group0: 1,
+    group1: 1,
+    group2: 1,
+    group3: 1,
+    group4: 2,
+    group5: 3,
+  };
+
+  const ColFirstLayout = {
+    group0: 8,
+    group1: 8,
+    group2: 8,
+    group3: 8,
+    group4: 7,
+    group5: 5,
+  };
+
+  const ColSecondLayout = {
+    group0: 8,
+    group1: 8,
+    group2: 8,
+    group3: 8,
+    group4: 3,
+    group5: 3,
+  };
+
+  return (
+    <>
+      <Grid
+        item
+        columns={ColFirstLayout}
+        startOffset={gridOffset}
+        as="main"
+        role="main"
+      >
+        {firstColItems}
+      </Grid>
+      <Grid item columns={ColSecondLayout}>
+        {secondColItems}
+      </Grid>
+    </>
+  );
+};
+
+TwoColumnLayout.propTypes = {
+  firstColItems: node.isRequired,
+  secondColItems: node.isRequired,
+};
 
 export default Grid;
