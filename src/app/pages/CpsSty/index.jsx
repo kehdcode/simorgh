@@ -10,7 +10,7 @@ import { C_CHALK } from '@bbc/psammead-styles/colours';
 import { GEL_GROUP_4_SCREEN_WIDTH_MIN } from '@bbc/gel-foundations/breakpoints';
 import path from 'ramda/src/path';
 import pathOr from 'ramda/src/pathOr';
-import Grid from '@bbc/psammead-grid';
+import Grid, { TwoColumnLayout } from '#app/components/Grid';
 import { getImageParts } from '#lib/utilities/preprocessor/rules/cpsAssetPage/convertToOptimoBlocks/blocks/image/helpers';
 import CpsMetadata from '#containers/CpsMetadata';
 import LinkedData from '#containers/LinkedData';
@@ -114,32 +114,29 @@ const CpsStyContainer = ({ pageData }) => {
     group5: true,
   };
 
-  const gridOffset = {
-    group0: 1,
-    group1: 1,
-    group2: 1,
-    group3: 1,
-    group4: 2,
-    group5: 3,
-  };
+  const firstColItems = (
+    <>
+      <Blocks blocks={blocks} componentsToRender={componentsToRender} />
+      <CpsRelatedContent content={relatedContent} />
+    </>
+  );
 
-  const gridColsMain = {
-    group0: 8,
-    group1: 8,
-    group2: 8,
-    group3: 8,
-    group4: 7,
-    group5: 5,
-  };
-
-  const gridColsSecondary = {
-    group0: 8,
-    group1: 8,
-    group2: 8,
-    group3: 8,
-    group4: 3,
-    group5: 3,
-  };
+  const secondColItems = (
+    <SecondaryColumn>
+      <Component>
+        <h2>This is a component in the second column</h2>
+      </Component>
+      <Component>
+        <h2>This is a component in the second column</h2>
+      </Component>
+      <Component>
+        <h2>This is a component in the second column</h2>
+      </Component>
+      <Component>
+        <h2>This is a component in the second column</h2>
+      </Component>
+    </SecondaryColumn>
+  );
 
   return (
     <>
@@ -163,34 +160,11 @@ const CpsStyContainer = ({ pageData }) => {
         aboutTags={aboutTags}
       />
       <ATIAnalytics data={pageData} />
-
       <StyledGrid columns={gridColumns} enableGelGutters margins={gridMargins}>
-        <Grid
-          item
-          columns={gridColsMain}
-          startOffset={gridOffset}
-          as="main"
-          role="main"
-        >
-          <Blocks blocks={blocks} componentsToRender={componentsToRender} />
-          <CpsRelatedContent content={relatedContent} />
-        </Grid>
-        <Grid item columns={gridColsSecondary}>
-          <SecondaryColumn>
-            <Component>
-              <h2>This is a component in the second column</h2>
-            </Component>
-            <Component>
-              <h2>This is a component in the second column</h2>
-            </Component>
-            <Component>
-              <h2>This is a component in the second column</h2>
-            </Component>
-            <Component>
-              <h2>This is a component in the second column</h2>
-            </Component>
-          </SecondaryColumn>
-        </Grid>
+        <TwoColumnLayout
+          firstColItems={firstColItems}
+          secondColItems={secondColItems}
+        />
       </StyledGrid>
     </>
   );
