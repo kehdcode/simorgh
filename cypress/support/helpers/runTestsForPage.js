@@ -85,13 +85,13 @@ const runTestsForPage = ({
           }
 
           // This is for low priority and long running tests and ensures they're only run when not smoke testing.
-          if (!Cypress.env('SMOKE')) {
-            testsThatNeverRunDuringSmokeTestingForAllPageTypes(testArgs);
-            testsThatNeverRunDuringSmokeTestingForAllCanonicalPages(testArgs);
-            // Page specific tests
-            testsThatNeverRunDuringSmokeTestingForCanonicalOnly(testArgs);
-            testsThatNeverRunDuringSmokeTesting(testArgs);
-          }
+          // if (!Cypress.env('SMOKE')) {
+          //   testsThatNeverRunDuringSmokeTestingForAllPageTypes(testArgs);
+          //   testsThatNeverRunDuringSmokeTestingForAllCanonicalPages(testArgs);
+          //   // Page specific tests
+          //   testsThatNeverRunDuringSmokeTestingForCanonicalOnly(testArgs);
+          //   testsThatNeverRunDuringSmokeTesting(testArgs);
+          // }
         });
 
         // Switch to AMP page URL (NB all our pages have AMP variants)
@@ -125,14 +125,14 @@ const runTestsForPage = ({
             testsThatFollowSmokeTestConfigForAMPOnly(testArgs);
           }
 
-          // This is for low priority and long running tests and ensures they're only run when not smoke testing.
-          if (!Cypress.env('SMOKE')) {
-            testsThatNeverRunDuringSmokeTestingForAllPageTypes(testArgs);
-            testsThatNeverRunDuringSmokeTestingForAllAMPPages(testArgs);
-            // Page specific tests
-            testsThatNeverRunDuringSmokeTestingForAMPOnly(testArgs);
-            testsThatNeverRunDuringSmokeTesting(testArgs);
-          }
+          // // This is for low priority and long running tests and ensures they're only run when not smoke testing.
+          // if (!Cypress.env('SMOKE')) {
+          //   testsThatNeverRunDuringSmokeTestingForAllPageTypes(testArgs);
+          //   testsThatNeverRunDuringSmokeTestingForAllAMPPages(testArgs);
+          //   // Page specific tests
+          //   testsThatNeverRunDuringSmokeTestingForAMPOnly(testArgs);
+          //   testsThatNeverRunDuringSmokeTesting(testArgs);
+          // }
         });
       });
     });
