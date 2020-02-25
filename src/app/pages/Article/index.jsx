@@ -1,35 +1,91 @@
-import React from 'react';
-import { shape } from 'prop-types';
-import pipe from 'ramda/src/pipe';
-import articlePropTypes from '#models/propTypes/article';
-import ArticleMain from '../../containers/ArticleMain';
+import React, { useContext } from 'react';
+import path from 'ramda/src/path';
+import styled from 'styled-components';
+import { articleDataPropTypes } from '#models/propTypes/article';
+import ArticleMetadata from '../../containers/ArticleMetadata';
+import { ServiceContext } from '#contexts/ServiceContext';
+import headings from '../../containers/Headings';
+import text from '../../containers/Text';
+import image from '../../containers/Image';
+import Blocks from '../../containers/Blocks';
+import timestamp from '../../containers/ArticleTimestamp';
+import { GhostGrid } from '#lib/styledGrid';
+import ATIAnalytics from '../../containers/ATIAnalytics';
+import ChartbeatAnalytics from '../../containers/ChartbeatAnalytics';
+import articleMediaPlayer from '../../containers/ArticleMediaPlayer';
+import LinkedData from '../../containers/LinkedData';
+import {
+  getArticleId,
+  getHeadline,
+  getSummary,
+  getFirstPublished,
+  getLastPublished,
+  getAboutTags,
+  getArticleSection,
+  getMentions,
+  getLang,
+} from '#lib/utilities/parseAssetData';
 
-import withVariant from '../../containers/PageHandlers/withVariant';
-import withContexts from '../../containers/PageHandlers/withContexts';
-import withPageWrapper from '../../containers/PageHandlers/withPageWrapper';
-import withError from '../../containers/PageHandlers/withError';
-import withLoading from '../../containers/PageHandlers/withLoading';
-import withData from '../../containers/PageHandlers/withData';
-
-const ArticleContainer = ({ pageData }) => (
-  <ArticleMain articleData={pageData} />
-);
-
-ArticleContainer.propTypes = {
-  pageData: shape(articlePropTypes),
+const componentsToRender = {
+  headline: headings,
+  subheadline: headings,
+  audio: articleMediaPlayer,
+  video: articleMediaPlayer,
+  text,
+  image,
+  timestamp,
 };
 
-ArticleContainer.defaultProps = {
-  pageData: null,
+const StyledMain = styled.main`
+  flex-grow: 1;
+`;
+
+const ArticlePage = ({ pageData }) => {
+  const { articleAuthor } = useContext(ServiceContext);
+  const headline = getHeadline(pageData);
+  const description = getSummary(pageData) || getHeadline(pageData);
+  const firstPublished = getFirstPublished(pageData);
+  const lastPublished = getLastPublished(pageData);
+  const aboutTags = getAboutTags(pageData);
+
+  return (
+    <>
+      <ATIAnalytics data={pageData} />
+      <ChartbeatAnalytics data={pageData} />
+      <ArticleMetadata
+        articleId={getArticleId(pageData)}
+        title={headline}
+        author={articleAuthor}
+        firstPublished={firstPublished}
+        lastPublished={lastPublished}
+        section={getArticleSection(pageData)}
+        aboutTags={aboutTags}
+        mentionsTags={getMentions(pageData)}
+        lang={getLang(pageData)}
+        description={description}
+      />
+      <LinkedData
+        showAuthor
+        type="Article"
+        seoTitle={headline}
+        headline={headline}
+        datePublished={firstPublished}
+        dateModified={lastPublished}
+        aboutTags={aboutTags}
+      />
+      <StyledMain role="main">
+        <GhostGrid>
+          <Blocks
+            blocks={path(['content', 'model', 'blocks'], pageData)}
+            componentsToRender={componentsToRender}
+          />
+        </GhostGrid>
+      </StyledMain>
+    </>
+  );
+};
+ArticlePage.propTypes = {
+  pageData: articleDataPropTypes.isRequired,
 };
 
-const EnhancedArticleContainer = pipe(
-  withData,
-  withError,
-  withLoading,
-  withPageWrapper,
-  withContexts,
-  withVariant,
-)(ArticleContainer);
-
-export default EnhancedArticleContainer;
+export default ArticlePage;

@@ -1,81 +1,83 @@
 import React from 'react';
+import { render, waitForDomChange } from '@testing-library/react';
+import mergeDeepLeft from 'ramda/src/mergeDeepLeft';
 import { shouldMatchSnapshot } from '@bbc/psammead-test-helpers';
-import ArticleContainer from './index';
+import ArticlePage from '.';
+import { RequestContextProvider } from '#contexts/RequestContext';
+import { ToggleContextProvider } from '#contexts/ToggleContext';
+import { ServiceContextProvider } from '#contexts/ServiceContext';
+import {
+  articleDataNews,
+  articleDataPersian,
+  articleDataPidgin,
+} from '#pages/Article/fixtureData';
 
-// explicitly ignore console.log errors for Article/index:getInitialProps() error logging
-global.console.log = jest.fn();
+// temporary: will be removed with https://github.com/bbc/simorgh/issues/836
+const articleDataNewsNoHeadline = JSON.parse(JSON.stringify(articleDataNews));
+articleDataNewsNoHeadline.content.model.blocks.shift();
 
-const defaultProps = {
-  isAmp: false,
-  pageType: 'article',
-  service: 'news',
-  pathname: '/pathname',
-  status: 200,
-};
+jest.mock('../../containers/ChartbeatAnalytics', () => {
+  const ChartbeatAnalytics = () => <div>chartbeat</div>;
+  return ChartbeatAnalytics;
+});
 
-jest.mock('../../containers/PageHandlers/withVariant', () => Component => {
-  const VariantContainer = props => (
-    <div id="VariantContainer">
-      <Component {...props} />
-    </div>
+// eslint-disable-next-line react/prop-types
+const Context = ({ service, children }) => (
+  <ToggleContextProvider>
+    <ServiceContextProvider service={service}>
+      <RequestContextProvider
+        bbcOrigin="https://www.test.bbc.co.uk"
+        id="c0000000000o"
+        isAmp={false}
+        pageType="article"
+        pathname="/pathname"
+        service={service}
+        statusCode={200}
+      >
+        {children}
+      </RequestContextProvider>
+    </ServiceContextProvider>
+  </ToggleContextProvider>
+);
+
+it('should use headline for meta description if summary does not exist', async () => {
+  const articleDataNewsWithSummary = mergeDeepLeft(
+    { promo: { summary: '' } },
+    articleDataNews,
   );
 
-  return VariantContainer;
-});
-
-jest.mock('../../containers/PageHandlers/withPageWrapper', () => Component => {
-  const PageWrapperContainer = props => (
-    <div id="PageWrapperContainer">
-      <Component {...props} />
-    </div>
+  render(
+    <Context service="news">
+      <ArticlePage pageData={articleDataNewsWithSummary} />
+    </Context>,
   );
 
-  return PageWrapperContainer;
-});
-
-jest.mock('../../containers/PageHandlers/withLoading', () => Component => {
-  const LoadingContainer = props => (
-    <div id="LoadingContainer">
-      <Component {...props} />
-    </div>
-  );
-
-  return LoadingContainer;
-});
-
-jest.mock('../../containers/PageHandlers/withError', () => Component => {
-  const ErrorContainer = props => (
-    <div id="ErrorContainer">
-      <Component {...props} />
-    </div>
-  );
-
-  return ErrorContainer;
-});
-
-jest.mock('../../containers/PageHandlers/withData', () => Component => {
-  const DataContainer = props => (
-    <div id="DataContainer">
-      <Component {...props} />
-    </div>
-  );
-
-  return DataContainer;
-});
-
-jest.mock('../../containers/ArticleMain', () => {
-  const ArticleMain = () => <div>ArticleMain</div>;
-
-  return ArticleMain;
-});
-
-describe('ArticleContainer', () => {
-  describe('Component', () => {
-    describe('Composing the Article Container using the page handlers', () => {
-      shouldMatchSnapshot(
-        'should compose articleContainer with the Page Handler in the correct order',
-        <ArticleContainer {...defaultProps} />,
-      );
-    });
+  await waitForDomChange({
+    container: document.querySelector('head'),
   });
+
+  expect(
+    document.querySelector('meta[name="description"]').getAttribute('content'),
+  ).toEqual('Article Headline for SEO');
 });
+
+shouldMatchSnapshot(
+  'should render a news article correctly',
+  <Context service="news">
+    <ArticlePage pageData={articleDataNews} />
+  </Context>,
+);
+
+shouldMatchSnapshot(
+  'should render a persian article correctly',
+  <Context service="persian">
+    <ArticlePage pageData={articleDataPersian} />
+  </Context>,
+);
+
+shouldMatchSnapshot(
+  'should render a pidgin article correctly (with navigation)',
+  <Context service="pidgin">
+    <ArticlePage pageData={articleDataPidgin} />
+  </Context>,
+);
